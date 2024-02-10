@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #converter {
+            text-align: center;
+            width: 300px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="converter">
+    <h2>Currency Converter</h2>
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount">
+
+    <label for="from">From Currency:</label>
+    <select id="from">
+        <!-- Add currency options here -->
+    </select>
+
+    <label for="to">To Currency:</label>
+    <select id="to">
+        <!-- Add currency options here -->
+    </select>
+
+    <button onclick="convertCurrency()">Convert</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    // Fetch currency options from the API
+    fetch('https://open.er-api.com/v6/latest')
+        .then(response => response.json())
+        .then(data => {
+            const currencies = Object.keys(data.rates);
+
+            const fromCurrencySelect = document.getElementById('from');
+            const toCurrencySelect = document.getElementById('to');
+
+            currencies.forEach(currency => {
+                const option = document.createElement('option');
+                option.value = currency;
+                option.innerText = currency;
+
+                fromCurrencySelect.appendChild(option.cloneNode(true));
+                toCurrencySelect.appendChild(option);
+            });
+        });
+
+    function convertCurrency() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const fromCurrency = document.getElementById('from').value;
+        const toCurrency = document.getElementById('to').value;
+
+        if (isNaN(amount) || amount <= 0) {
+            alert('Please enter a valid amount.');
+            return;
+        }
+
+        fetch(`https://open.er-api.com/v6/latest`)
+            .then(response => response.json())
+            .then(data => {
+                const exchangeRate = data.rates[toCurrency] / data.rates[fromCurrency];
+                const result = (amount * exchangeRate).toFixed(2);
+
+                document.getElementById('result').innerText = `${amount} ${fromCurrency} is equal to ${result} ${toCurrency}`;
+            })
+            .catch(error => {
+                console.error('Error fetching exchange rates:', error);
+            });
+    }
+</script>
+
+</body>
+</html>
